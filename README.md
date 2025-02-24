@@ -6,4 +6,6 @@ REPO - CREATED
 Prisma initiated
 Backend server listening at 8080 
 
-BASIC CRUD for backend completed, tested
+BASIC CRUD for user backend completed, tested
+
+BASIC CRUD for questions backend completed, tested
