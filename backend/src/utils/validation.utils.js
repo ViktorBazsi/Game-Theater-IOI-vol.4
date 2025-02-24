@@ -21,15 +21,16 @@ export const isValidUsername = async (username) => {
 
 // GET USERID FROM TOKEN
 export const extractUserIdFromToken = (req, JWT_SECRET) => {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      throw new HttpError("Token hiányzik", 401);
-    }
-  
-    try {
-      const decodedToken = jwt.verify(token, JWT_SECRET);
-      return decodedToken.id;
-    } catch (error) {
-      throw new HttpError("Érvénytelen token", 401);
-    }
-  };
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    throw new HttpError("Token hiányzik", 401);
+  }
+
+  try {
+    const decodedToken = jwt.verify(token, JWT_SECRET);
+    return decodedToken.id;
+  } catch (error) {
+    console.error("Token ellenőrzési hiba:", error);
+    throw new HttpError("Érvénytelen token", 401);
+  }
+};

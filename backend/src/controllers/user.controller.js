@@ -1,7 +1,7 @@
 import userService from "../services/user.service.js";
-import { JWT_SECRET } from "../constants/constants.js";
-import HttpError from "../utils/HttpError.js";
-import { extractUserIdFromToken } from "../utils/validation.utils.js";
+// import { JWT_SECRET } from "../constants/constants.js";
+// import HttpError from "../utils/HttpError.js";
+// import { extractUserIdFromToken } from "../utils/validation.utils.js";
 
 const create = async (req, res, next) => {
   const { username, email, password } = req.body;
