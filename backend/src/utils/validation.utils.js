@@ -19,6 +19,15 @@ export const isValidUsername = async (username) => {
   return user;
 };
 
+// QUESTION
+export const isValidQuestionId = async (id) => {
+  const question = await prisma.question.findUnique({
+    where: { id },
+  });
+  if (!question) throw new HttpError("question id nem található!", 404);
+  return question;
+};
+
 // GET USERID FROM TOKEN
 export const extractUserIdFromToken = (req, JWT_SECRET) => {
   const token = req.headers.authorization?.split(" ")[1];
