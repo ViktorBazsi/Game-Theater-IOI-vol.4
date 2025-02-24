@@ -9,7 +9,7 @@
     "lint": "eslint src --ext .js",
     "lint:fix": "eslint --fix src --ext .js",
     "format": "prettier --check \"{,!(node_modules)/**/}*.js\"",
-		"format:fix": "prettier --write \"{,!(node_modules)/**/}*.js\""
+    "format:fix": "prettier --write \"{,!(node_modules)/**/}*.js\""
   },
   "keywords": [],
   "author": "",
