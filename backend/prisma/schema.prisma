@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String            @id @default(cuid())
+  username    String            @unique
+  email       String            @unique
+  password    String
+  isAdmin     Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  games       Game[]            @relation("User_Game")
+}
+
+model Question {
+  id          String            @id @default(cuid())
+  number      Int               @unique
+  question    String
+  answers     Answer[] // for one question more answers possible
+  games       Game[]            @relation("Question_Game")
+}
+
+model Answer {
+  id          String            @id @default(cuid())
+  // Relation to question
+  relQuestN   Int
+  question    Question          @relation(fields: [relQuestN], references: [number], onDelete: Cascade)
+  // Answer text
+  answer      String
+  // Relationship results
+  resultReka  Int
+  resultDomi  Int
+  resultKata  Int
+  // Next question for this answer
+  nextQuestN  Int
+}
+
+model Game {
+  id          String            @id @default(cuid())
+  name        String
+  users       User[]            @relation("User_Game")
+  questions   Question[]        @relation("Question_Game")
+}
