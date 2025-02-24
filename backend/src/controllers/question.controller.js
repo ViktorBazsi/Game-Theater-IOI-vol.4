@@ -7,7 +7,7 @@ const create = async (req, res, next) => {
 
   if (!userId) {
     return next(
-      new HttpError("Admin bejelentkezés kell a kérdés feltöltéséhez", 401)
+      new HttpError("Admin bejelentkezés kell a kérdés feltöltéséhez", 401),
     );
   }
 
@@ -45,7 +45,7 @@ const getByNumber = async (req, res, next) => {
   const { number } = req.params;
   try {
     const getQuestionByNumber = await questionService.getByNumber(
-      Number(number)
+      Number(number),
     );
     res.status(200).json(getQuestionByNumber);
   } catch (error) {

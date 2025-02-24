@@ -12,7 +12,7 @@ router.post(
   authMiddleware.authenticate,
   authMiddleware.authorize,
   upload.none(),
-  questionController.create
+  questionController.create,
 );
 // GET
 router.get("/", authMiddleware.authenticate, questionController.list);
@@ -20,21 +20,21 @@ router.get("/:id", authMiddleware.authenticate, questionController.getById);
 router.get(
   "/number/:number",
   authMiddleware.authenticate,
-  questionController.getByNumber
+  questionController.getByNumber,
 );
 // PUT
 router.put(
   "/:id",
   authMiddleware.authenticate,
   authMiddleware.authorize,
-  questionController.update
+  questionController.update,
 );
 // DELETE
 router.delete(
   "/:id",
   authMiddleware.authenticate,
   authMiddleware.authorize,
-  questionController.destroy
+  questionController.destroy,
 );
 
 export default router;
