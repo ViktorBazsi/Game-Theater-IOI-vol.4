@@ -28,6 +28,15 @@ export const isValidQuestionId = async (id) => {
   return question;
 };
 
+// ANSWER
+export const isValidAnswerId = async (id) => {
+  const answer = await prisma.answer.findUnique({
+    where: { id },
+  });
+  if (!answer) throw new HttpError("answer id nem található!", 404);
+  return answer;
+};
+
 // GET USERID FROM TOKEN
 export const extractUserIdFromToken = (req, JWT_SECRET) => {
   const token = req.headers.authorization?.split(" ")[1];
