@@ -37,6 +37,23 @@ export const isValidAnswerId = async (id) => {
   return answer;
 };
 
+// GAME
+export const isValidGameName = async (name) => {
+  const validGameName = await prisma.game.findFirst({
+    where: { name },
+  });
+  if (validGameName) throw new HttpError("A játék neve már foglalt", 404);
+  return validGameName;
+};
+
+export const isValidGameId = async (id) => {
+  const validGameId = await prisma.game.findUnique({
+    where: { id },
+  });
+  if (!validGameId) throw new HttpError("gamePathId nem található!", 404);
+  return validGameId;
+};
+
 // GET USERID FROM TOKEN
 export const extractUserIdFromToken = (req, JWT_SECRET) => {
   const token = req.headers.authorization?.split(" ")[1];
