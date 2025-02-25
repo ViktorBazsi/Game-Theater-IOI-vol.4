@@ -13,5 +13,13 @@ router.get("/:id", userController.getById);
 router.put("/:id", authMiddleware.authenticate, userController.update);
 // DELETE
 router.delete("/:id", authMiddleware.authenticate, userController.destroy);
+// JOIN
+router.post("/join", authMiddleware.authenticate, userController.joinGame);
+// REMOVE
+router.post(
+  "/remove",
+  authMiddleware.authenticate,
+  userController.removeFromGame,
+);
 
 export default router;
