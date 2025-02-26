@@ -30,29 +30,13 @@ const create = async ({ username, email, password }) => {
 };
 
 const list = async () => {
-  const allUsers = await prisma.user.findMany({
-    include: {
-      games: true,
-    },
-  });
+  const allUsers = await prisma.user.findMany();
   return allUsers;
 };
 
 const getById = async (id) => {
   const userById = await prisma.user.findUnique({
     where: { id },
-    include: {
-      games: {
-        include: {
-          question: {
-            include: {
-              answers: true,
-            },
-          },
-          answer: true,
-        },
-      },
-    },
   });
   return userById;
 };
