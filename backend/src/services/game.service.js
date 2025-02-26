@@ -1,6 +1,5 @@
 import prisma from "../models/prismaClient.js";
 import { isValidGameName, isValidGameId } from "../utils/validation.utils.js";
-import questionService from "../services/question.service.js";
 
 const create = async ({ name }) => {
   await isValidGameName(name);

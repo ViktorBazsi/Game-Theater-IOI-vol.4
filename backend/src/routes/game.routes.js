@@ -12,7 +12,7 @@ router.post(
   authMiddleware.authenticate,
   authMiddleware.authorize,
   upload.none(),
-  gameController.create
+  gameController.create,
 );
 // GET
 router.get("/", authMiddleware.authenticate, gameController.list);

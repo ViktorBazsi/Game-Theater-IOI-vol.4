@@ -1,5 +1,4 @@
 import gameService from "../services/game.service.js";
-import HttpError from "../utils/HttpError.js";
 
 const create = async (req, res, next) => {
   const { name } = req.body;
