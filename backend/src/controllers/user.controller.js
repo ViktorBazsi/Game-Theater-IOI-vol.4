@@ -76,9 +76,43 @@ const destroy = async (req, res, next) => {
   }
 };
 
-// const userAnswer = async (req, res, next)=>{
-//   const question = await 
-// }
+// JOIN GAME
+
+const joinGame = async (req, res, next) => {
+  try {
+    const { gameId } = req.body;
+    const userId = req.user.id; // Az authenticate middleware állítja be
+
+    if (!gameId) {
+      return next(new HttpError("Missing gameId", 400));
+    }
+
+    await userService.addUserToGame(gameId, userId);
+    res.status(200).json({ message: "User successfully added to the game" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// REMOVE FROM GAME
+
+const removeFromGame = async (req, res, next) => {
+  try {
+    const { gameId } = req.body;
+    const userId = req.user.id; // Az authenticate middleware állítja be
+
+    if (!gameId) {
+      return next(new HttpError("Missing gameId", 400));
+    }
+
+    await userService.removeUserFromGame(gameId, userId);
+    res
+      .status(200)
+      .json({ message: "User successfully removed from the game" });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export default {
   create,
@@ -86,4 +120,8 @@ export default {
   getById,
   update,
   destroy,
+  // JOIN
+  joinGame,
+  // REMOVE
+  removeFromGame,
 };
