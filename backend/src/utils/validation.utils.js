@@ -50,7 +50,7 @@ export const isValidGameId = async (id) => {
   const validGameId = await prisma.game.findUnique({
     where: { id },
   });
-  if (!validGameId) throw new HttpError("gamePathId nem található!", 404);
+  if (!validGameId) throw new HttpError("A játék nem található!", 404);
   return validGameId;
 };
 
