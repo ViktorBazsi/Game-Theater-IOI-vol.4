@@ -41,6 +41,18 @@ const list = async () => {
 const getById = async (id) => {
   const userById = await prisma.user.findUnique({
     where: { id },
+    include: {
+      games: {
+        include: {
+          question: {
+            include: {
+              answers: true,
+            },
+          },
+          answer: true,
+        },
+      },
+    },
   });
   return userById;
 };
