@@ -13,5 +13,16 @@ router.get("/:id", userController.getById);
 router.put("/:id", authMiddleware.authenticate, userController.update);
 // DELETE
 router.delete("/:id", authMiddleware.authenticate, userController.destroy);
+// EXTRA FEATURE
+router.post(
+  "/join-game/:gameId",
+  authMiddleware.authenticate,
+  userController.joinGameById
+);
+router.post(
+  "/leave-game/:gameId",
+  authMiddleware.authenticate,
+  userController.leaveGameById
+);
 
 export default router;

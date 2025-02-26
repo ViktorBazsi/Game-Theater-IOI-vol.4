@@ -42,6 +42,9 @@ const update = async (id, gameData) => {
     const updatedGame = await prisma.game.update({
       where: { id },
       data: { ...gameData },
+      include: {
+        users: true,
+      },
     });
     return updatedGame;
   }
