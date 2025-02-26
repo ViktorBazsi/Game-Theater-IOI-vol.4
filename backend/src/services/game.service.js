@@ -13,7 +13,6 @@ const list = async () => {
   const allGames = await prisma.game.findMany({
     include: {
       users: true,
-      question: true,
     },
   });
   return allGames;
@@ -25,12 +24,6 @@ const getById = async (id) => {
     where: { id },
     include: {
       users: true,
-      question: {
-        include: {
-          answers: true,
-        },
-      },
-      answer: true,
     },
   });
   return gameById;
