@@ -20,7 +20,8 @@ model User {
   password    String
   isAdmin     Boolean           @default(false)
   createdAt   DateTime          @default(now())
-  games       Game[]            @relation("User_Game")
+  gameId      String?           
+  games       Game?             @relation(fields: [gameId], references: [id])
 }
 
 model Question {
@@ -28,7 +29,7 @@ model Question {
   number      Int               @unique
   question    String
   answers     Answer[] // for one question more answers possible
-  games       Game[]            @relation("Question_Game")
+  gamequest   Game[] // one question for many games
 }
 
 model Answer {
@@ -45,14 +46,18 @@ model Answer {
   // Next question for this answer
   nextQuestN  Int
   // Relation to game
-  game        Game[]              @relation("Answer_Game")
+  gameAnswer  Game[]            
 }
 
 model Game {
   id          String            @id @default(cuid())
   name        String
   createdAt   DateTime          @default(now())
-  users       User[]            @relation("User_Game")
-  question    Question[]        @relation("Question_Game")
-  answer      Answer []         @relation("Answer_Game")
+  users       User[]
+  // Aktális kérdés
+  questionId  String?            
+  question    Question?          @relation(fields: [questionId], references: [id])
+  // Aktuális válasz
+  resultAnsId String?
+  answer      Answer?            @relation(fields: [resultAnsId], references: [id])
 }

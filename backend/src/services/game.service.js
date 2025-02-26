@@ -56,50 +56,10 @@ const destroy = async (id) => {
   return deletedGame;
 };
 
-export const addQuestionToGame = async (id, number) => {
-  // Lekérjük a kérdést a number alapján
-  const question = await questionService.getByNumber(Number(number));
-
-  if (!question) {
-    throw new Error("Question not found");
-  }
-
-  await isValidGameId(id);
-
-  // Ellenőrizzük, hogy a kérdés már hozzá van-e adva a játékhoz
-  // const isAlreadyAdded = game.questions.some((q) => q.id === question.id);
-
-  // if (isAlreadyAdded) {
-  //   throw new Error("Question already added to the game");
-  // }
-
-  // Hozzáadjuk a kérdést a játékhoz
-
-  const updatedGameWithQuestion = await prisma.game.update({
-    where: { id },
-    data: {
-      question: {
-        set: [{ id: question.id }],
-      },
-    },
-    include: {
-      question: {
-        include: {
-          answers: true,
-        },
-      },
-      answer: true,
-    },
-  });
-  return updatedGameWithQuestion;
-};
-
 export default {
   list,
   getById,
   create,
   update,
   destroy,
-  // EXTRA
-  addQuestionToGame,
 };

@@ -22,11 +22,4 @@ router.put("/:id", authMiddleware.authenticate, gameController.update);
 // DELETE
 router.delete("/:id", authMiddleware.authenticate, gameController.destroy);
 
-// EXTRA
-router.post(
-  "/:id/next-question",
-  authMiddleware.authenticate,
-  gameController.addQuestion
-);
-
 export default router;

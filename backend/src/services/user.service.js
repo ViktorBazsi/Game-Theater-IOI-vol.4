@@ -74,58 +74,10 @@ const destroy = async (id) => {
   return deletedUser;
 };
 
-// JOIN GAME
-
-const addUserToGame = async (gameId, userId) => {
-  // Ellenőrizzük, hogy a játék és a felhasználó létezik-e
-  const game = await prisma.game.findUnique({ where: { id: gameId } });
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-
-  if (!game || !user) {
-    throw new Error("Game or User not found");
-  }
-
-  // Felhasználó hozzáadása a játékhoz
-  return await prisma.game.update({
-    where: { id: gameId },
-    data: {
-      users: {
-        connect: { id: userId },
-      },
-    },
-  });
-};
-
-// ROMVE FROM GAME
-
-const removeUserFromGame = async (gameId, userId) => {
-  // Ellenőrizzük, hogy a játék és a felhasználó létezik-e
-  const game = await prisma.game.findUnique({ where: { id: gameId } });
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-
-  if (!game || !user) {
-    throw new Error("Game or User not found");
-  }
-
-  // Felhasználó hozzáadása a játékhoz
-  return await prisma.game.update({
-    where: { id: gameId },
-    data: {
-      users: {
-        disconnect: { id: userId },
-      },
-    },
-  });
-};
-
 export default {
   create,
   list,
   getById,
   update,
   destroy,
-  // JOIN
-  addUserToGame,
-  // REMOVE
-  removeUserFromGame,
 };
