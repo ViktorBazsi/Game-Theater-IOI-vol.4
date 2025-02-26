@@ -30,7 +30,11 @@ const create = async ({ username, email, password }) => {
 };
 
 const list = async () => {
-  const allUsers = await prisma.user.findMany();
+  const allUsers = await prisma.user.findMany({
+    include: {
+      games: true,
+    },
+  });
   return allUsers;
 };
 

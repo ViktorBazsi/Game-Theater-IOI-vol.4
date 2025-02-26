@@ -1,4 +1,5 @@
 import gameService from "../services/game.service.js";
+import HttpError from "../utils/HttpError.js";
 
 const create = async (req, res, next) => {
   const { name } = req.body;
@@ -57,10 +58,32 @@ const destroy = async (req, res, next) => {
   }
 };
 
+const addQuestion = async (req, res, next) => {
+  try {
+    const { number } = req.body;
+    const { id } = req.params;
+
+    if (!number) {
+      return next(new HttpError("Missing number in request body", 400));
+    }
+
+    if (!id) {
+      return next(new HttpError("Missing gameId in request params", 400));
+    }
+
+    const updatedGame = await gameService.addQuestionToGame(id, number);
+    res.status(200).json(updatedGame);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   list,
   getById,
   create,
   update,
   destroy,
+  // EXTRA
+  addQuestion,
 };

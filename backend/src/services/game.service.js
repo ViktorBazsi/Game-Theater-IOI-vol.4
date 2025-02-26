@@ -1,5 +1,6 @@
 import prisma from "../models/prismaClient.js";
 import { isValidGameName, isValidGameId } from "../utils/validation.utils.js";
+import questionService from "../services/question.service.js";
 
 const create = async ({ name }) => {
   await isValidGameName(name);
@@ -13,7 +14,7 @@ const list = async () => {
   const allGames = await prisma.game.findMany({
     include: {
       users: true,
-      questions: true,
+      question: true,
     },
   });
   return allGames;
@@ -25,7 +26,12 @@ const getById = async (id) => {
     where: { id },
     include: {
       users: true,
-      questions: true,
+      question: {
+        include: {
+          answers: true,
+        },
+      },
+      answer: true,
     },
   });
   return gameById;
@@ -50,10 +56,50 @@ const destroy = async (id) => {
   return deletedGame;
 };
 
+export const addQuestionToGame = async (id, number) => {
+  // Lekérjük a kérdést a number alapján
+  const question = await questionService.getByNumber(Number(number));
+
+  if (!question) {
+    throw new Error("Question not found");
+  }
+
+  await isValidGameId(id);
+
+  // Ellenőrizzük, hogy a kérdés már hozzá van-e adva a játékhoz
+  // const isAlreadyAdded = game.questions.some((q) => q.id === question.id);
+
+  // if (isAlreadyAdded) {
+  //   throw new Error("Question already added to the game");
+  // }
+
+  // Hozzáadjuk a kérdést a játékhoz
+
+  const updatedGameWithQuestion = await prisma.game.update({
+    where: { id },
+    data: {
+      question: {
+        set: [{ id: question.id }],
+      },
+    },
+    include: {
+      question: {
+        include: {
+          answers: true,
+        },
+      },
+      answer: true,
+    },
+  });
+  return updatedGameWithQuestion;
+};
+
 export default {
   list,
   getById,
   create,
   update,
   destroy,
+  // EXTRA
+  addQuestionToGame,
 };

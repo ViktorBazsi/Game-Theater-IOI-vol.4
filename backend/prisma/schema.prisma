@@ -44,6 +44,8 @@ model Answer {
   resultKata  Int
   // Next question for this answer
   nextQuestN  Int
+  // Relation to game
+  game        Game[]              @relation("Answer_Game")
 }
 
 model Game {
@@ -51,5 +53,6 @@ model Game {
   name        String
   createdAt   DateTime          @default(now())
   users       User[]            @relation("User_Game")
-  questions   Question[]        @relation("Question_Game")
+  question    Question[]        @relation("Question_Game")
+  answer      Answer []         @relation("Answer_Game")
 }

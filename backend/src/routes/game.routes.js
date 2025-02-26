@@ -12,7 +12,7 @@ router.post(
   authMiddleware.authenticate,
   authMiddleware.authorize,
   upload.none(),
-  gameController.create,
+  gameController.create
 );
 // GET
 router.get("/", authMiddleware.authenticate, gameController.list);
@@ -21,5 +21,12 @@ router.get("/:id", authMiddleware.authenticate, gameController.getById);
 router.put("/:id", authMiddleware.authenticate, gameController.update);
 // DELETE
 router.delete("/:id", authMiddleware.authenticate, gameController.destroy);
+
+// EXTRA
+router.post(
+  "/:id/next-question",
+  authMiddleware.authenticate,
+  gameController.addQuestion
+);
 
 export default router;

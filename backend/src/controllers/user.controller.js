@@ -76,6 +76,10 @@ const destroy = async (req, res, next) => {
   }
 };
 
+// const userAnswer = async (req, res, next)=>{
+//   const question = await 
+// }
+
 export default {
   create,
   list,
