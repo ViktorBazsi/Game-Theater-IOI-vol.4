@@ -1,4 +1,5 @@
 import gameService from "../services/game.service.js";
+import questionService from "../services/question.service.js";
 
 const create = async (req, res, next) => {
   const { name } = req.body;
@@ -57,10 +58,24 @@ const destroy = async (req, res, next) => {
   }
 };
 
+const nextQuestion = async (req, res, next) => {
+  const { id } = req.params;
+  const currentGame = await gameService.getById(id);
+  const nextQuestionNumber = currentGame.questionNum + 1;
+  try {
+    const nextQuestion = await questionService.getByNumber(nextQuestionNumber);
+    res.status(201).json(nextQuestion);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   list,
   getById,
   create,
   update,
   destroy,
+  // NEXT
+  nextQuestion,
 };
