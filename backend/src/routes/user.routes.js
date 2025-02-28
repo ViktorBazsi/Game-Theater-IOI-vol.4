@@ -24,5 +24,11 @@ router.post(
   authMiddleware.authenticate,
   userController.LeaveGameById
 );
+// ANSWER
+router.post(
+  "/answer/:gameId",
+  authMiddleware.authenticate,
+  userController.addAnswerToGame
+);
 
 export default router;

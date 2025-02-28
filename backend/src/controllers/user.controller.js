@@ -3,6 +3,7 @@ import { JWT_SECRET } from "../constants/constants.js";
 import HttpError from "../utils/HttpError.js";
 import { extractUserIdFromToken } from "../utils/validation.utils.js";
 import gameService from "../services/game.service.js";
+import answerService from "../services/answer.service.js";
 
 const create = async (req, res, next) => {
   const { username, email, password } = req.body;
@@ -127,11 +128,9 @@ const LeaveGameById = async (req, res, next) => {
     // Ellenőrizzük, hogy a felhasználó már benne van-e a játékban
     const isUserAlreadyInGame = game.users.some((u) => u.id === user.id);
     if (!isUserAlreadyInGame) {
-      return res
-        .status(400)
-        .json({
-          error: "Nem tudsz kilépni ebből a játékból, mert nem vagy benne.",
-        });
+      return res.status(400).json({
+        error: "Nem tudsz kilépni ebből a játékból, mert nem vagy benne.",
+      });
     }
 
     // **Prisma update: connect user to game**
@@ -150,6 +149,37 @@ const LeaveGameById = async (req, res, next) => {
   }
 };
 
+// ANSWER
+const addAnswerToGame = async (req, res, next) => {
+  const { gameId } = req.params; // A game ID kinyerése az URL-ből
+  const { id: answerId } = req.body; // Az answer ID kinyerése a body-ból
+
+  try {
+    // 📌 Ellenőrizzük, hogy létezik-e a játék
+    const game = await gameService.getById(gameId);
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    // 📌 Ellenőrizzük, hogy létezik-e a válasz az adatbázisban
+    const existingAnswer = await answerService.getById(answerId);
+    if (!existingAnswer) {
+      return res.status(404).json({ error: "Answer not found" });
+    }
+
+    // 📌 A meglévő answer kapcsolása a game.collAnswers tömbhöz (Prisma `connect` használata)
+    const updatedGame = await gameService.update(gameId, {
+      collAnswers: {
+        connect: { id: answerId }, // 🔥 Kapcsoljuk a meglévő answer-t a game-hez
+      },
+    });
+
+    res.status(200).json(updatedGame); // 📌 Frissített játék visszaküldése
+  } catch (error) {
+    next(error); // Hibakezelés
+  }
+};
+
 export default {
   create,
   list,
@@ -159,4 +189,6 @@ export default {
   // EXTRA
   joinGameById,
   LeaveGameById,
+  // ANSWER
+  addAnswerToGame,
 };

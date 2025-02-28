@@ -46,8 +46,7 @@ model Answer {
   // Next question for this answer
   nextQuestN  Int
   // Relation to game
-  gameAnswer  Game[]
-  collectiveAnswer  Game[]          @relation("Answer_Game")            
+  collAnswer  Game[]          @relation("Answer_Game")            
 }
 
 model Game {
@@ -58,8 +57,6 @@ model Game {
   // Aktális kérdés
   questionNum Int               @default(0)            
   question    Question?          @relation(fields: [questionNum], references: [number])
-  // Aktuális válasz
-  resultAnsId String?
-  answer      Answer?            @relation(fields: [resultAnsId], references: [id])
+  // Válaszok
   collAnswers     Answer[]           @relation("Answer_Game")
 }

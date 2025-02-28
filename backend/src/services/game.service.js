@@ -24,20 +24,22 @@ const getById = async (id) => {
     where: { id },
     include: {
       users: true,
+      collAnswers: true,
     },
   });
   return gameById;
 };
 
 const update = async (id, gameData) => {
-  {
-    await isValidGameId(id);
-    const updatedGame = await prisma.game.update({
-      where: { id },
-      data: { ...gameData },
-    });
-    return updatedGame;
-  }
+  await isValidGameId(id);
+
+  const updatedGame = await prisma.game.update({
+    where: { id },
+    data: { ...gameData },
+    include: { collAnswers: true }, // 🔥 Így a `collAnswers` tartalma is visszajön
+  });
+
+  return updatedGame;
 };
 
 const destroy = async (id) => {
