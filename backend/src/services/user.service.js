@@ -30,23 +30,68 @@ const create = async ({ username, email, password }) => {
 };
 
 const list = async () => {
-  const allUsers = await prisma.user.findMany();
+  const allUsers = await prisma.user.findMany({
+    include: {
+      answers: true,
+    },
+  });
   return allUsers;
 };
 
 const getById = async (id) => {
   const userById = await prisma.user.findUnique({
     where: { id },
+    include: {
+      answers: true,
+    },
   });
   return userById;
 };
 
+// const update = async (id, userData) => {
+//   await isValidUserId(id);
+//   const updatedUser = await prisma.user.update({
+//     where: { id },
+//     data: { ...userData },
+//   });
+//   return updatedUser;
+// };
+
 const update = async (id, userData) => {
   await isValidUserId(id);
+
   const updatedUser = await prisma.user.update({
     where: { id },
-    data: { ...userData },
+    data: {
+      ...(userData.answers && {
+        answers: {
+          connect: userData.answers.map((answerId) => ({ id: answerId })),
+        },
+      }),
+    },
+    include: {
+      answers: true, // 📌 Visszaküldjük a felhasználóhoz tartozó válaszokat
+    },
   });
+
+  return updatedUser;
+};
+
+const resetAnswers = async (id) => {
+  await isValidUserId(id);
+
+  const updatedUser = await prisma.user.update({
+    where: { id },
+    data: {
+      answers: {
+        set: [], // 📌 Minden választ eltávolítunk (disconnect)
+      },
+    },
+    include: {
+      answers: true, // 📌 Visszaküldjük a felhasználóhoz tartozó válaszokat (most üres lesz)
+    },
+  });
+
   return updatedUser;
 };
 
@@ -64,4 +109,6 @@ export default {
   getById,
   update,
   destroy,
+  // EXTRA
+  resetAnswers,
 };

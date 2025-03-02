@@ -22,6 +22,7 @@ model User {
   createdAt   DateTime          @default(now())
   gameId      String?           
   games       Game?             @relation(fields: [gameId], references: [id])
+  answers     Answer[]          @relation("User_Answer")
 }
 
 model Question {
@@ -46,7 +47,9 @@ model Answer {
   // Next question for this answer
   nextQuestN  Int
   // Relation to game
-  collAnswer  Game[]          @relation("Answer_Game")            
+  collAnswer  Game[]          @relation("User_Answer_Game")
+  // User
+  User        User[]          @relation("User_Answer")
 }
 
 model Game {
@@ -58,5 +61,5 @@ model Game {
   questionNum Int               @default(0)            
   question    Question?          @relation(fields: [questionNum], references: [number])
   // Válaszok
-  collAnswers     Answer[]           @relation("Answer_Game")
+  collAnswer     Answer[]           @relation("User_Answer_Game")
 }

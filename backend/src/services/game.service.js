@@ -23,8 +23,12 @@ const getById = async (id) => {
   const gameById = await prisma.game.findUnique({
     where: { id },
     include: {
-      users: true,
-      collAnswers: true,
+      users: {
+        include: {
+          answers: true,
+        },
+      },
+      collAnswer: true,
     },
   });
   return gameById;
@@ -36,7 +40,7 @@ const update = async (id, gameData) => {
   const updatedGame = await prisma.game.update({
     where: { id },
     data: { ...gameData },
-    include: { collAnswers: true }, // 🔥 Így a `collAnswers` tartalma is visszajön
+    include: { collAnswer: true }, // 🔥 Így a `collAnswers` tartalma is visszajön
   });
 
   return updatedGame;
@@ -58,11 +62,11 @@ const resetGame = async (id, gameData) => {
     where: { id },
     data: {
       ...gameData,
-      collAnswers: {
+      collAnswer: {
         set: [], // 🔥 Az összes választ eltávolítja anélkül, hogy törölné azokat
       },
     },
-    include: { collAnswers: true },
+    include: { collAnswer: true },
   });
 
   return updatedGame;

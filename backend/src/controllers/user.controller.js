@@ -78,6 +78,24 @@ const destroy = async (req, res, next) => {
   }
 };
 
+// REMOVE USER ANSWERS
+const resetAnswers = async (req, res, next) => {
+  const { id } = req.params;
+
+  // UserId from token - AUTHENTICATION NEEDED
+  let userId = extractUserIdFromToken(req, JWT_SECRET);
+  if (id != userId) {
+    return next(new HttpError("Csak a saját profilodat módosíthatod", 401));
+  }
+
+  try {
+    const updatedUser = await userService.resetAnswers(id);
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // EXTRA
 const joinGameById = async (req, res, next) => {
   const { gameId } = req.params;
@@ -181,41 +199,75 @@ const LeaveGameById = async (req, res, next) => {
 //   }
 // };
 
+// VOL2:
+// const addAnswerToGame = async (req, res, next) => {
+//   const { gameId } = req.params; // A játék ID kinyerése az URL-ből
+//   const { id: answerId } = req.body; // A válasz ID-ja
+//   const userId = req.user?.id; // 🔥 Felhasználó ID-ja az auth middleware-ből
+
+//   try {
+//     // 📌 Ellenőrizzük, hogy a felhasználó be van-e jelentkezve
+//     if (!userId) {
+//       return res
+//         .status(401)
+//         .json({ error: "Unauthorized: User not authenticated" });
+//     }
+
+//     // 📌 Ellenőrizzük, hogy létezik-e a játék
+//     const game = await gameService.getById(gameId);
+//     if (!game) {
+//       return res.status(404).json({ error: "Game not found" });
+//     }
+
+//     // 📌 Ellenőrizzük, hogy létezik-e a válasz az adatbázisban
+//     const existingAnswer = await answerService.getById(answerId);
+//     if (!existingAnswer) {
+//       return res.status(404).json({ error: "Answer not found" });
+//     }
+
+//     // 📌 Hozzáadjuk az új választ a `collAnswers` tömbhöz (duplikációk is megengedettek)
+//     const updatedGame = await gameService.update(gameId, {
+//       collAnswers: {
+//         connect: { id: answerId }, // 🔥 Hozzácsatoljuk az új választ anélkül, hogy törölnénk az előzőeket
+//       },
+//     });
+
+//     res.status(200).json(updatedGame); // 📌 Frissített játék visszaküldése
+//   } catch (error) {
+//     next(error); // Hibakezelés
+//   }
+// };
+
 const addAnswerToGame = async (req, res, next) => {
-  const { gameId } = req.params; // A játék ID kinyerése az URL-ből
-  const { id: answerId } = req.body; // A válasz ID-ja
-  const userId = req.user?.id; // 🔥 Felhasználó ID-ja az auth middleware-ből
+  const { gameId } = req.params;
+  const { id: answerId } = req.body;
+  const userId = req.user?.id;
 
   try {
-    // 📌 Ellenőrizzük, hogy a felhasználó be van-e jelentkezve
     if (!userId) {
       return res
         .status(401)
         .json({ error: "Unauthorized: User not authenticated" });
     }
 
-    // 📌 Ellenőrizzük, hogy létezik-e a játék
     const game = await gameService.getById(gameId);
     if (!game) {
       return res.status(404).json({ error: "Game not found" });
     }
 
-    // 📌 Ellenőrizzük, hogy létezik-e a válasz az adatbázisban
     const existingAnswer = await answerService.getById(answerId);
     if (!existingAnswer) {
       return res.status(404).json({ error: "Answer not found" });
     }
 
-    // 📌 Hozzáadjuk az új választ a `collAnswers` tömbhöz (duplikációk is megengedettek)
-    const updatedGame = await gameService.update(gameId, {
-      collAnswers: {
-        connect: { id: answerId }, // 🔥 Hozzácsatoljuk az új választ anélkül, hogy törölnénk az előzőeket
-      },
+    // 🔥 A felhasználóhoz hozzákapcsoljuk az új választ
+    const updatedUser = await userService.update(userId, {
+      answers: [answerId],
     });
 
-    res.status(200).json(updatedGame); // 📌 Frissített játék visszaküldése
+    res.status(200).json(updatedUser);
   } catch (error) {
-    next(error); // Hibakezelés
+    next(error);
   }
 };
 
@@ -225,6 +277,8 @@ export default {
   getById,
   update,
   destroy,
+  // REMOVE ANSWERS
+  resetAnswers,
   // EXTRA
   joinGameById,
   LeaveGameById,

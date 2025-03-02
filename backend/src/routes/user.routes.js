@@ -30,5 +30,11 @@ router.post(
   authMiddleware.authenticate,
   userController.addAnswerToGame
 );
+// REMOVE ANSWERS
+router.put(
+  "/reset/:id",
+  authMiddleware.authenticate,
+  userController.resetAnswers
+);
 
 export default router;
