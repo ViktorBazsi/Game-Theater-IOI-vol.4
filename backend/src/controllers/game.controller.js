@@ -58,13 +58,105 @@ const destroy = async (req, res, next) => {
   }
 };
 
+// const nextQuestion = async (req, res, next) => {
+//   const { id } = req.params;
+//   const currentGame = await gameService.getById(id);
+//   const nextQuestionNumber = currentGame.questionNum + 1;
+//   try {
+//     const nextQuestion = await questionService.getByNumber(nextQuestionNumber);
+//     res.status(201).json(nextQuestion);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+// RESET
+const reset = async (req, res, next) => {
+  const { id } = req.params;
+  const { name, questionNum } = req.body;
+
+  try {
+    const resetGameData = await gameService.resetGame(id, {
+      name,
+      questionNum,
+    });
+    res.status(200).json(resetGameData);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// NEXT
 const nextQuestion = async (req, res, next) => {
   const { id } = req.params;
-  const currentGame = await gameService.getById(id);
-  const nextQuestionNumber = currentGame.questionNum + 1;
+
   try {
+    // Játék és következő kérdés lekérése
+    let currentGame = await gameService.getById(id);
+    const nextQuestionNumber = currentGame.questionNum + 1;
     const nextQuestion = await questionService.getByNumber(nextQuestionNumber);
+
+    // 🔥 Előző válaszok törlése a collAnswers-ből
+    await gameService.update(id, {
+      collAnswers: {
+        set: [], // 🔥 Kiürítjük a tömböt, hogy ne maradjanak benne korábbi válaszok
+      },
+    });
+
+    // 🔥 Kiküldjük az új kérdést a kliensnek
     res.status(201).json(nextQuestion);
+
+    // 20 másodperc várakozás a felhasználói válaszokra
+    await new Promise((resolve) => setTimeout(resolve, 20000));
+
+    // 🔥 Ismét lekérjük a frissített játék állapotot, hogy megkapjuk az új válaszokat
+    currentGame = await gameService.getById(id);
+
+    // Ha nincsenek beérkezett válaszok, nem csinálunk semmit
+    if (!currentGame.collAnswers || currentGame.collAnswers.length === 0) {
+      console.log("No answers received");
+      return;
+    }
+
+    // 🔥 Számoljuk, hogy melyik válaszból mennyi érkezett
+    const answerCounts = currentGame.collAnswers.reduce((acc, answer) => {
+      acc[answer.id] = (acc[answer.id] || 0) + 1;
+      return acc;
+    }, {});
+
+    // 🔥 Megkeressük a legtöbbször érkezett válaszokat
+    let maxCount = Math.max(...Object.values(answerCounts));
+    let mostVotedAnswers = Object.keys(answerCounts).filter(
+      (id) => answerCounts[id] === maxCount
+    );
+
+    // 🔥 Ha több válasznak is ugyanannyi szavazata van, véletlenszerűen választunk egyet
+    const selectedAnswerId =
+      mostVotedAnswers.length > 1
+        ? mostVotedAnswers[Math.floor(Math.random() * mostVotedAnswers.length)]
+        : mostVotedAnswers[0];
+
+    // 🔥 Kiválasztott válasz objektumának kikeresése
+    const selectedAnswer = currentGame.collAnswers.find(
+      (answer) => answer.id === selectedAnswerId
+    );
+
+    if (!selectedAnswer) {
+      console.error("Selected answer not found in collAnswers");
+      return;
+    }
+
+    // 🔥 Frissítjük a játék állapotát Prisma-val: csak a legtöbb szavazatot kapott választ tartjuk meg
+    await gameService.update(id, {
+      collAnswers: {
+        set: [{ id: selectedAnswerId }], // 🔥 Csak az ID marad
+      },
+      questionNum: selectedAnswer.nextQuestN, // 🔥 A kiválasztott válasz nextQuestN értékét beírjuk
+    });
+
+    console.log(
+      `Game ${id} updated: selected answer = ${selectedAnswerId}, next questionNum = ${selectedAnswer.nextQuestN}`
+    );
   } catch (error) {
     next(error);
   }
@@ -76,6 +168,8 @@ export default {
   create,
   update,
   destroy,
+  // RESET
+  reset,
   // NEXT
   nextQuestion,
 };

@@ -150,11 +150,50 @@ const LeaveGameById = async (req, res, next) => {
 };
 
 // ANSWER
+// wokring ver 01
+// const addAnswerToGame = async (req, res, next) => {
+//   const { gameId } = req.params; // A game ID kinyerése az URL-ből
+//   const { id: answerId } = req.body; // Az answer ID kinyerése a body-ból
+
+//   try {
+//     // 📌 Ellenőrizzük, hogy létezik-e a játék
+//     const game = await gameService.getById(gameId);
+//     if (!game) {
+//       return res.status(404).json({ error: "Game not found" });
+//     }
+
+//     // 📌 Ellenőrizzük, hogy létezik-e a válasz az adatbázisban
+//     const existingAnswer = await answerService.getById(answerId);
+//     if (!existingAnswer) {
+//       return res.status(404).json({ error: "Answer not found" });
+//     }
+
+//     // 📌 A meglévő answer kapcsolása a game.collAnswers tömbhöz (Prisma `connect` használata)
+//     const updatedGame = await gameService.update(gameId, {
+//       collAnswers: {
+//         connect: { id: answerId }, // 🔥 Kapcsoljuk a meglévő answer-t a game-hez
+//       },
+//     });
+
+//     res.status(200).json(updatedGame); // 📌 Frissített játék visszaküldése
+//   } catch (error) {
+//     next(error); // Hibakezelés
+//   }
+// };
+
 const addAnswerToGame = async (req, res, next) => {
-  const { gameId } = req.params; // A game ID kinyerése az URL-ből
-  const { id: answerId } = req.body; // Az answer ID kinyerése a body-ból
+  const { gameId } = req.params; // A játék ID kinyerése az URL-ből
+  const { id: answerId } = req.body; // A válasz ID-ja
+  const userId = req.user?.id; // 🔥 Felhasználó ID-ja az auth middleware-ből
 
   try {
+    // 📌 Ellenőrizzük, hogy a felhasználó be van-e jelentkezve
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ error: "Unauthorized: User not authenticated" });
+    }
+
     // 📌 Ellenőrizzük, hogy létezik-e a játék
     const game = await gameService.getById(gameId);
     if (!game) {
@@ -167,10 +206,10 @@ const addAnswerToGame = async (req, res, next) => {
       return res.status(404).json({ error: "Answer not found" });
     }
 
-    // 📌 A meglévő answer kapcsolása a game.collAnswers tömbhöz (Prisma `connect` használata)
+    // 📌 Hozzáadjuk az új választ a `collAnswers` tömbhöz (duplikációk is megengedettek)
     const updatedGame = await gameService.update(gameId, {
       collAnswers: {
-        connect: { id: answerId }, // 🔥 Kapcsoljuk a meglévő answer-t a game-hez
+        connect: { id: answerId }, // 🔥 Hozzácsatoljuk az új választ anélkül, hogy törölnénk az előzőeket
       },
     });
 

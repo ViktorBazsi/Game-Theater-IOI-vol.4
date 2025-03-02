@@ -50,10 +50,30 @@ const destroy = async (id) => {
   return deletedGame;
 };
 
+// EXTRA
+const resetGame = async (id, gameData) => {
+  await isValidGameId(id);
+
+  const updatedGame = await prisma.game.update({
+    where: { id },
+    data: {
+      ...gameData,
+      collAnswers: {
+        set: [], // 🔥 Az összes választ eltávolítja anélkül, hogy törölné azokat
+      },
+    },
+    include: { collAnswers: true },
+  });
+
+  return updatedGame;
+};
+
 export default {
   list,
   getById,
   create,
   update,
   destroy,
+  // EXTRA
+  resetGame,
 };

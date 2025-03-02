@@ -27,5 +27,7 @@ router.get(
   authMiddleware.authenticate,
   gameController.nextQuestion
 );
+// RESET
+router.put("/reset/:id", authMiddleware.authenticate, gameController.reset);
 
 export default router;
