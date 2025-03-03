@@ -62,4 +62,7 @@ model Game {
   question    Question?          @relation(fields: [questionNum], references: [number])
   // Válaszok
   collAnswer     Answer[]           @relation("User_Answer_Game")
+  rekaResult  Int               @default(0)
+  domiResult  Int               @default(0)
+  kataResult  Int               @default(0)
 }

@@ -73,12 +73,15 @@ const destroy = async (req, res, next) => {
 // RESET
 const reset = async (req, res, next) => {
   const { id } = req.params;
-  const { name, questionNum } = req.body;
+  const { name, questionNum, rekaResult, domiResult, kataResult } = req.body;
 
   try {
     const resetGameData = await gameService.resetGame(id, {
       name,
       questionNum,
+      rekaResult,
+      domiResult,
+      kataResult,
     });
     res.status(200).json(resetGameData);
   } catch (error) {
@@ -240,6 +243,11 @@ const nextQuestion = async (req, res, next) => {
         set: [{ id: selectedAnswerId }], // 🔥 Az új válasz beállítása, előzőek törlése
       },
       questionNum: selectedAnswer.nextQuestN, // 🔥 Következő kérdés beállítása
+
+      // 🔥 Hozzáadjuk a válasz eredményeit az eddigi eredményekhez
+      rekaResult: currentGame.rekaResult + selectedAnswer.resultReka,
+      domiResult: currentGame.domiResult + selectedAnswer.resultDomi,
+      kataResult: currentGame.kataResult + selectedAnswer.resultKata,
     });
 
     console.log(
