@@ -26,11 +26,11 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed bg-blue-200 top-0 left-0 w-full text-blue-900 py-4 px-24 flex justify-between items-center shadow-md">
+      <header className="fixed top-0 left-0 w-full text-white py-4 px-24 flex justify-between items-center shadow-md">
         <div className="flex gap-4 text-xl font-bold">
           <h1 className="cursor-default">Üdvözlünk a játékSzínházban</h1>
           {user && (
-            <span className="hover:text-blue-800 transition duration-300 cursor-default">
+            <span className="hover:text-white transform transition hover:cursor-pointer duration-700 hover:scale-110 hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] cursor-default">
               {`${user.username}!`}
             </span>
           )}
@@ -40,13 +40,13 @@ export default function Header() {
             <>
               <Link
                 to="/signedIn"
-                className="rounded-md px-3 py-2 text-blue-900 border border-transparent hover:border-blue-600 hover:text-blue-600 transition duration-300"
+                className="rounded-md px-3 py-2 hover:border-2  hover:text-white hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] transform transition duration-300 hover:scale-110"
               >
                 Profilod
               </Link>
               <Link
                 to="/signedIn/games"
-                className="rounded-md px-3 py-2 text-blue-900 border border-transparent hover:border-blue-600 hover:text-blue-600 transition duration-300"
+                className="rounded-md px-3 py-2 hover:border-2  hover:text-white hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] transform transition duration-300 hover:scale-110"
               >
                 Eddigi játékaid
               </Link>
@@ -75,7 +75,7 @@ export default function Header() {
             </>
           ) : (
             <button
-              className="rounded-md px-3 py-2 bg-green-600 text-white hover:bg-green-700 transition duration-300"
+              className="rounded-md px-3 py-2  text-green-600 border border-transparent hover:border-green-600 hover:text-green-700 transition duration-300"
               onClick={() => setIsModalOpen(true)}
             >
               Belépés

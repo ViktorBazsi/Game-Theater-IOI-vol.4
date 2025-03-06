@@ -7,7 +7,11 @@ export default {
   ],
 
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        "logo-pattern": "url('/Public/GT_001.png')",
+      },
+    },
   },
   plugins: [],
 };

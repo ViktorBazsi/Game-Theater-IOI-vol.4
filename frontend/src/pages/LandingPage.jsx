@@ -5,9 +5,9 @@ export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState("login"); // login vagy register
 
-//   const toggleModal = () => {
-//     setIsModalOpen(!isModalOpen);
-//   };
+  //   const toggleModal = () => {
+  //     setIsModalOpen(!isModalOpen);
+  //   };
 
   const showLoginModal = () => {
     setModalType("login");
@@ -20,7 +20,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="h-screen bg-blue-300">
+    <div className="h-screen bg-logo-pattern bg-cover bg-center">
       <div className="h-full flex flex-col justify-end items-center text-white text-center">
         <button
           className="border-2 text-white px-4 py-2 rounded-lg hover:scale-110 transition duration-700 mb-48"
