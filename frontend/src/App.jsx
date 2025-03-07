@@ -17,7 +17,7 @@ function App() {
         <ToastContainer /> {/* 🔹 Ezt ide rakd, hogy minden oldalon működjön */}
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/signedIn" element={<MainPage />} />
+          <Route path="/main" element={<MainPage />} />
         </Routes>
       </AuthProvider>
     </Router>

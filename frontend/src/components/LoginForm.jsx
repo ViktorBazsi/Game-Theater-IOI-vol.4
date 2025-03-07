@@ -20,7 +20,7 @@ export default function LoginForm({ onRegisterClick, onSuccess }) {
         autoClose: 3000,
       });
       onSuccess(); // 🔹 Sikeres bejelentkezés után bezárja a modalt
-      navigate("/signedIn");
+      navigate("/main");
     } else {
       const errorMessage =
         result.message?.response?.data?.error || "Ismeretlen hiba";
