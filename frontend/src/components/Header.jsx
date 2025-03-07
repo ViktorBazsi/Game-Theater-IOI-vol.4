@@ -1,13 +1,25 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import userService from "../services/user.service"; // 📌 Import az alapértelmezett exportból
 import AuthContext from "../contexts/AuthContext";
-import AuthModal from "./modals/AuthModal"; // Új AuthModal importálása
+import AuthModal from "./modals/AuthModal";
 
 export default function Header() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState("login"); // login vagy register
+  const [gameId, setGameId] = useState(null); // A lekért gameId tárolása
+
+  useEffect(() => {
+    if (user?.id) {
+      userService.getById(user.id).then((userData) => {
+        if (userData?.gameId) {
+          setGameId(userData.gameId);
+        }
+      });
+    }
+  }, [user?.id]);
 
   const handleLogout = () => {
     logout();
@@ -39,17 +51,18 @@ export default function Header() {
           {user ? (
             <>
               <Link
-                to="/signedIn"
-                className="rounded-md px-3 py-2 hover:border-2  hover:text-white hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] transform transition duration-300 hover:scale-110"
+                to="/main"
+                className="rounded-md px-3 py-2 hover:border-2 hover:text-white hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] transform transition duration-300 hover:scale-110"
               >
-                Profilod
+                Home
               </Link>
               <Link
-                to="/signedIn/games"
-                className="rounded-md px-3 py-2 hover:border-2  hover:text-white hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] transform transition duration-300 hover:scale-110"
+                to={`/game/${gameId}`}
+                className="rounded-md px-3 py-2 hover:border-2 hover:text-white hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] transform transition duration-300 hover:scale-110"
               >
-                Eddigi játékaid
+                Játékod
               </Link>
+
               {user.isAdmin && (
                 <>
                   <Link
@@ -58,12 +71,16 @@ export default function Header() {
                   >
                     Kérdések & Válaszok
                   </Link>
-                  <Link
-                    to="/newGame"
-                    className="rounded-md px-3 py-2 text-yellow-500 border border-transparent hover:border-yellow-500 hover:text-yellow-600 transition duration-300"
-                  >
-                    Új játék
-                  </Link>
+
+                  {/* Admin játék menüpont, csak akkor ha a usernek van gameId-ja */}
+                  {gameId && (
+                    <Link
+                      to={`/game-admin/${gameId}`}
+                      className="rounded-md px-3 py-2 text-yellow-500 border border-transparent hover:border-yellow-500 hover:text-yellow-600 transition duration-300"
+                    >
+                      Admin Játék
+                    </Link>
+                  )}
                 </>
               )}
               <button
@@ -75,7 +92,7 @@ export default function Header() {
             </>
           ) : (
             <button
-              className="rounded-md px-3 py-2  text-green-600 border border-transparent hover:border-green-600 hover:text-green-700 transition duration-300"
+              className="rounded-md px-3 py-2 text-green-600 border border-transparent hover:border-green-600 hover:text-green-700 transition duration-300"
               onClick={() => setIsModalOpen(true)}
             >
               Belépés
@@ -87,7 +104,7 @@ export default function Header() {
       {/* Új AuthModal megjelenítése */}
       <AuthModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)} // 🔹 Így a háttérre kattintás és az `×` gomb is bezárja
+        onClose={() => setIsModalOpen(false)}
         modalType={modalType}
         showRegisterModal={showRegisterModal}
         showLoginModal={showLoginModal}

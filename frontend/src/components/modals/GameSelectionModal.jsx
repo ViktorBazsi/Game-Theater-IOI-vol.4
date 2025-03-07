@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom"; // Importáld a useNavigate-et
 import gameService from "../../services/game.service";
 import userService from "../../services/user.service";
 import AuthContext from "../../contexts/AuthContext";
@@ -7,6 +8,7 @@ export default function GameSelectionModal({ onClose }) {
   const { user } = useContext(AuthContext);
   const [games, setGames] = useState([]);
   const [_userGameId, setUserGameId] = useState(null);
+  const navigate = useNavigate(); // Használjuk a navigációhoz
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -14,9 +16,8 @@ export default function GameSelectionModal({ onClose }) {
         const gamesList = await gameService.listAllGames();
         setGames(gamesList);
 
-        // Helyesen ellenőrizzük, hogy a felhasználó csatlakozott-e valamelyik játékhoz
-        const joinedGame = gamesList.find(
-          (game) => game.users?.some((player) => player.id === user?.id) // JAVÍTOTT sor
+        const joinedGame = gamesList.find((game) =>
+          game.users?.some((player) => player.id === user?.id)
         );
 
         setUserGameId(joinedGame ? joinedGame.id : null);
@@ -33,6 +34,7 @@ export default function GameSelectionModal({ onClose }) {
       await userService.joinGameById(gameId);
       setUserGameId(gameId);
       onClose();
+      navigate(`/game/${gameId}`); // Átnavigálás a kiválasztott játék oldalára
     } catch (error) {
       console.error("Hiba a csatlakozáskor:", error);
     }
@@ -56,7 +58,7 @@ export default function GameSelectionModal({ onClose }) {
           {games.map((game) => {
             const isUserInGame = game.users?.some(
               (player) => player.id === user?.id
-            ); // JAVÍTOTT sor
+            );
             return (
               <li
                 key={game.id}

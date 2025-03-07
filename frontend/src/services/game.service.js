@@ -5,6 +5,12 @@ const listAllGames = async () => {
   return response.data;
 };
 
+const getGameById = async (gameId) => {
+  const response = await axiosInstance.get(`/api/game/${gameId}`);
+  return response.data;
+};
+
 export default {
   listAllGames,
+  getGameById,
 };
