@@ -15,8 +15,17 @@ const leaveGameById = async (gameId) => {
   return response.data;
 };
 
+const answerByUserByGameById = async (gameId, answer) => {
+  const response = await axiosInstance.post(
+    `/api/user/answer/${gameId}`,
+    answer
+  );
+  return response.data;
+};
+
 export default {
   getById,
   joinGameById,
   leaveGameById,
+  answerByUserByGameById,
 };
