@@ -5,7 +5,7 @@ import gameService from "../services/game.service";
 import GameSummary from "../components/GameSummary";
 import UpcomingQuestion from "../components/UpcomingQuestion"; // 📌 Importáljuk az új komponenst
 
-export default function GamePage() {
+export default function GameAdminPage() {
   const { gameId } = useParams(); // 🔹 URL-ből kiolvassuk a gameId-t
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
