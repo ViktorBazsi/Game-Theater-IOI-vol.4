@@ -10,6 +10,11 @@ const getGameById = async (gameId) => {
   return response.data;
 };
 
+const getCurrentQuestion = async (gameId) => {
+  const response = await axiosInstance.get(`/api/game/next/${gameId}`);
+  return response.data;
+};
+
 const NextQuestionByGameById = async (gameId) => {
   const response = await axiosInstance.get(`/api/game/next/${gameId}`);
   return response.data;
@@ -18,5 +23,6 @@ const NextQuestionByGameById = async (gameId) => {
 export default {
   listAllGames,
   getGameById,
+  getCurrentQuestion,
   NextQuestionByGameById,
 };

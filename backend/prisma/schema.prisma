@@ -60,6 +60,8 @@ model Game {
   // Aktális kérdés
   questionNum Int               @default(0)            
   question    Question?          @relation(fields: [questionNum], references: [number])
+  // Lehet-e válaszolni
+  availableForAns Boolean           @default(false)
   // Válaszok
   collAnswer     Answer[]           @relation("User_Answer_Game")
   rekaResult  Int               @default(0)

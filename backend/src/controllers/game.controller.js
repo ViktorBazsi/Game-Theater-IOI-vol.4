@@ -181,14 +181,20 @@ const nextQuestion = async (req, res, next) => {
       return res.status(404).json({ error: "Question not found" });
     }
 
-    // 🔥 Kiküldjük az aktuális kérdést és válaszait
-    res.status(201).json(currentQuestion);
+    // 🔥 Elérhetővé tesszük a válaszadást
+    await gameService.update(id, { availableForAns: true });
+
+    // 🔥 Kiküldjük az aktuális kérdést, válaszokat és a válaszolhatóság állapotát
+    res.status(201).json({ ...currentQuestion, availableForAns: true });
 
     // 🔥 Megjegyezzük a kiküldött válaszok ID-jait
     const validAnswerIds = currentQuestion.answers.map((answer) => answer.id);
 
     // 20 másodperc várakozás a válaszokra
     await new Promise((resolve) => setTimeout(resolve, 20000));
+
+    // 🔥 Válaszadás lehetőség letiltása
+    await gameService.update(id, { availableForAns: false });
 
     // 🔥 Ismét lekérjük a frissített játék állapotot, hogy megkapjuk a felhasználók válaszait
     currentGame = await gameService.getById(id, {
