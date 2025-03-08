@@ -15,24 +15,38 @@ export default function GamePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [availableForAns, setAvailableForAns] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(null); // ⏳ Visszaszámláló állapota
 
   // 🔄 Frissítjük a játék állapotát 2 másodpercenként
   useEffect(() => {
     const fetchGame = async () => {
       try {
         const gameData = await gameService.getGameById(gameId);
-
         setGame(gameData);
         setAvailableForAns(gameData.availableForAns || false);
 
-        // 🔥 Ha availableForAns true, akkor kérdéslekérés a questionNum alapján
+        // 🔥 Ha availableForAns true és új kérdés érkezik, akkor:
+        // - Nullázzuk a submittedAnswer-t (hogy újra lehessen választani)
+        // - Nullázzuk a selectedAnswer-t is (ne maradjon kijelölve az előző válasz)
+        // - Állítsuk be a visszaszámlálót 20-ra
+        if (gameData.availableForAns && timeLeft === null) {
+          setTimeLeft(20);
+          setSubmittedAnswer(null);
+          setSelectedAnswer(null);
+        }
+
+        // 🔥 Ha availableForAns false lesz, nullázzuk a kérdést és visszaszámlálót
+        if (!gameData.availableForAns) {
+          setCurrentQuestion(null);
+          setTimeLeft(null);
+        }
+
+        // 🔥 Lekérdezzük a kérdést, ha availableForAns true és van kérdésszám
         if (gameData.availableForAns && gameData.questionNum) {
           const questionData = await questionService.getQuestionByNumber(
             gameData.questionNum
           );
           setCurrentQuestion(questionData);
-        } else {
-          setCurrentQuestion(null);
         }
       } catch (err) {
         setError("Hiba történt a játék betöltése közben.");
@@ -44,15 +58,18 @@ export default function GamePage() {
 
     const interval = setInterval(fetchGame, 2000);
     return () => clearInterval(interval);
-  }, [gameId]);
+  }, [gameId, timeLeft]); // 🔄 timeLeft is figyelés alatt
 
-  // 🔄 Ha `availableForAns` false lesz, visszaállunk várakozó állapotba
+  // 🔄 Visszaszámláló (egyszeri indítás)
   useEffect(() => {
-    if (!availableForAns) {
-      setSelectedAnswer(null);
-      setSubmittedAnswer(null);
+    if (timeLeft !== null && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => (prev > 0 ? prev - 1 : null));
+      }, 1000);
+
+      return () => clearInterval(timer);
     }
-  }, [availableForAns]);
+  }, [timeLeft]); // 🔥 Csak akkor indul el újra, ha timeLeft nem null
 
   // ✅ A felhasználó válaszküldése
   const submitAnswer = async () => {
@@ -120,6 +137,11 @@ export default function GamePage() {
               Válasz beküldése
             </button>
           )}
+
+          {/* 🔥 Visszaszámláló megjelenítése */}
+          <p className="mt-4 text-red-500 font-bold">
+            {timeLeft !== null ? `Hátralévő idő: ${timeLeft} másodperc` : ""}
+          </p>
         </div>
       ) : (
         <p className="text-lg mt-4">Kérdés betöltése...</p>
