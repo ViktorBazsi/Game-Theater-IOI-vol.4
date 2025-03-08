@@ -10,6 +10,7 @@ import LandingPage from "./pages/LandingPage";
 import MainPage from "./pages/MainPage";
 import GamePage from "./pages/GamePage";
 import GameAdminPage from "./pages/GameAdminPage";
+import PageForActors from "./pages/PageForActors";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/main" element={<MainPage />} />
+          <Route path="/actors" element={<PageForActors />} />
           <Route path="/game/:gameId" element={<GamePage />} />{" "}
           <Route path="/game-admin/:gameId" element={<GameAdminPage />} />{" "}
           {/* 🔹 Dinamikus gameId paraméter */}
