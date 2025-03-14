@@ -1,27 +1,13 @@
-import React from "react";
-import UsersAnsewers from "./UsersAndAnswers";
+import { useState } from "react";
+import CollectiveAnswersModal from "./modals/CollectiveAnswersModal";
 
-export default function GameSummary({ game }) {
-  if (!game) {
-    return (
-      <div className="text-center text-white pt-24">
-        Nincs elérhető játékadat.
-      </div>
-    );
-  }
+export default function UsersAnsewers({ game }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="w-2/3 flex justify-center items-center p-6">
+    <div className="w-full flex justify-center items-center p-6">
       <div className="max-w-3xl w-full bg-gray-800 p-6 rounded-lg shadow-lg text-white">
-        <h1 className="text-3xl font-bold mb-4">{game.name}</h1>
-        <p className="text-lg mb-4">
-          Létrehozva: {new Date(game.createdAt).toLocaleString()}
-        </p>
-        <p className="text-lg mb-4">Aktuális kérdésszám: {game.questionNum}</p>
-
-        <UsersAnsewers game={game} />
-
-        {/* <h2 className="text-xl font-semibold mb-2">Játékosok és válaszaik:</h2>
+        <h2 className="text-xl font-semibold mb-2">Játékosok és válaszaik:</h2>
         {game.users?.length > 0 ? (
           <ul className="list-none">
             {game.users.map((player) => (
@@ -60,19 +46,57 @@ export default function GameSummary({ game }) {
             <p className="font-bold">Kata</p>
             <p className="text-lg">{game.kataResult}</p>
           </div>
-        </div> */}
+        </div>
 
-        {/* {game.collAnswer?.length > 0 && (
+        {game.collAnswer?.length > 0 && (
           <>
             <h2 className="text-xl font-semibold mt-4 mb-2">
               Kollektív válaszok:
             </h2>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+              onClick={() => setIsModalOpen(true)}
+            >
+              Megtekintés
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="bg-gray-800 p-6 rounded-lg shadow-lg text-white max-w-lg w-full"
+            onClick={(e) => e.stopPropagation()} // Megakadályozza a háttér kattintáskor a bezárást
+          >
+            <h2 className="text-xl font-semibold mb-4">Kollektív válaszok</h2>
             <pre className="bg-gray-900 p-4 rounded text-sm">
               {JSON.stringify(game.collAnswer, null, 2)}
             </pre>
-          </>
-        )} */}
-      </div>
+            <button
+              className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+              onClick={() => setIsModalOpen(false)}
+            >
+              Bezárás
+            </button>
+          </div>
+
+          {/* Modal használata */}
+          <CollectiveAnswersModal
+            title="Kollektív válaszok"
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          >
+            <pre className="bg-gray-900 p-4 rounded text-sm">
+              {JSON.stringify(game.collAnswer, null, 2)}
+            </pre>
+          </CollectiveAnswersModal>
+        </div>
+      )}
     </div>
   );
 }

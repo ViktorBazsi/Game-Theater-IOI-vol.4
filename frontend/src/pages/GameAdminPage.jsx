@@ -10,15 +10,13 @@ export default function GameAdminPage() {
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(null); // ⏳ Visszaszámláló
-  const [lastQuestionNum, setLastQuestionNum] = useState(null); // 🔥 Az előző kérdésszámot tárolja
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [lastQuestionNum, setLastQuestionNum] = useState(null);
 
   const fetchGame = async () => {
     try {
       const gameData = await gameService.getGameById(gameId);
       setGame(gameData);
-
-      // 🔥 Ha a kérdésszám megváltozott, frissítsük azt is
       if (gameData.questionNum !== lastQuestionNum) {
         setLastQuestionNum(gameData.questionNum);
       }
@@ -32,27 +30,22 @@ export default function GameAdminPage() {
 
   useEffect(() => {
     fetchGame();
-  }, [gameId]); // 🔄 Frissítés a játék állapotának változásakor
+  }, [gameId]);
 
   const handleNextQuestion = async () => {
     setLoading(true);
     setError(null);
-    setTimeLeft(20); // ⏳ Indul a visszaszámlálás
+    setTimeLeft(20);
 
     try {
       await gameService.NextQuestionByGameById(gameId);
-
-      // ⏳ Indítjuk a 20 másodperces visszaszámlálást
       const countdown = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev === 1) {
             clearInterval(countdown);
             setTimeLeft(null);
-
-            // 🔄 Kétszer frissítjük a game adatokat, hogy biztosan naprakész legyen
             fetchGame();
-            setTimeout(fetchGame, 1000); // Egy kis idő múlva újra lekérjük az adatokat
-
+            setTimeout(fetchGame, 1000);
             return null;
           }
           return prev - 1;
@@ -76,24 +69,24 @@ export default function GameAdminPage() {
   }
 
   return (
-    <div className="h-screen bg-logo-pattern bg-cover bg-center p-6">
-      <div className="h-full flex text-white">
-        {/* Bal oldal: GameSummary (2/3 szélesség) */}
-        <div className="w-2/3 flex justify-center items-center">
+    <div className="bg-logo-pattern bg-cover bg-center pt-20">
+      <div className="max-w-screen-xl mx-auto min-h-[calc(100vh-80px)] flex flex-col lg:flex-row gap-6 p-6">
+        {/* Game Summary (3/5 szélesség nagy kijelzőn) */}
+        <div className="lg:w-3/5 flex justify-center items-center">
           <GameSummary game={game} />
         </div>
 
-        {/* Jobb oldal: UpcomingQuestion (1/3 szélesség) */}
-        <div className="w-1/3 flex flex-col justify-center items-center">
+        {/* Upcoming Question (2/5 szélesség nagy kijelzőn) */}
+        <div className="lg:w-2/5 flex flex-col items-center">
           {game?.questionNum && (
             <UpcomingQuestion questionNumber={game.questionNum} />
           )}
 
-          {/* Gomb és hibaüzenet az UpcomingQuestion alatt */}
-          <div className="mt-4 text-white">
+          {/* Gomb és visszaszámláló */}
+          <div className="mt-4 text-white text-center w-full">
             <button
               onClick={handleNextQuestion}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+              className="w-full md:w-auto bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50"
               disabled={loading || timeLeft !== null}
             >
               {loading
