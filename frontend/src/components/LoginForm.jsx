@@ -2,7 +2,7 @@ import { useContext } from "react";
 import AuthContext from "../contexts/AuthContext";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { useNavigate } from "react-router-dom";
-import { userValidationSchemaForLogin } from "../schema/userValidationSchema";
+import { userValidationSchemaForLogin } from "../schema/UserValidationSchema";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Importáld a toast CSS-t
 

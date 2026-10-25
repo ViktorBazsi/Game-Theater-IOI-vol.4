@@ -1,5 +1,6 @@
 import gameService from "../services/game.service.js";
 import questionService from "../services/question.service.js";
+import HttpError from "../utils/HttpError.js";
 
 const create = async (req, res, next) => {
   const { name } = req.body;
@@ -26,7 +27,10 @@ const list = async (req, res, next) => {
 const getById = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const getGameById = await gameService.getById(id);
+    // a játékosok válaszait csak az admin kapja meg
+    const getGameById = await gameService.getById(id, {
+      withAnswers: Boolean(req.user?.isAdmin),
+    });
     res.status(200).json(getGameById);
   } catch (error) {
     next(error);
@@ -168,25 +172,37 @@ const reset = async (req, res, next) => {
 
 const nextQuestion = async (req, res, next) => {
   const { id } = req.params;
+  let currentQuestion;
 
   try {
     // 🔥 Játék és aktuális kérdés lekérése
-    let currentGame = await gameService.getById(id);
-    const currentQuestionNumber = currentGame.questionNum;
-    const currentQuestion = await questionService.getByNumber(
-      currentQuestionNumber
-    );
+    const currentGame = await gameService.getById(id);
+
+    // Már fut egy szavazás: nem indítunk második időzítőt
+    if (currentGame.availableForAns) {
+      return next(new HttpError("A szavazás már folyamatban van", 409));
+    }
+
+    currentQuestion = await questionService.getByNumber(currentGame.questionNum);
 
     if (!currentQuestion) {
       return res.status(404).json({ error: "Question not found" });
     }
 
-    // 🔥 Elérhetővé tesszük a válaszadást
-    await gameService.update(id, { availableForAns: true });
+    // 🔥 Elérhetővé tesszük a válaszadást (atomikusan, párhuzamos hívások ellen)
+    const opened = await gameService.openVoting(id);
+    if (!opened) {
+      return next(new HttpError("A szavazás már folyamatban van", 409));
+    }
 
     // 🔥 Kiküldjük az aktuális kérdést, válaszokat és a válaszolhatóság állapotát
     res.status(201).json({ ...currentQuestion, availableForAns: true });
+  } catch (error) {
+    return next(error);
+  }
 
+  // Innen a válasz már elment: hiba esetén nem hívhatunk next(error)-t
+  try {
     // 🔥 Megjegyezzük a kiküldött válaszok ID-jait
     const validAnswerIds = currentQuestion.answers.map((answer) => answer.id);
 
@@ -197,9 +213,7 @@ const nextQuestion = async (req, res, next) => {
     await gameService.update(id, { availableForAns: false });
 
     // 🔥 Ismét lekérjük a frissített játék állapotot, hogy megkapjuk a felhasználók válaszait
-    currentGame = await gameService.getById(id, {
-      include: { users: { include: { answers: true } } },
-    });
+    const currentGame = await gameService.getById(id, { withAnswers: true });
 
     // 🔥 Felhasználók válaszainak begyűjtése
     const userAnswers = currentGame.users.flatMap((user) => user.answers);
@@ -260,7 +274,15 @@ const nextQuestion = async (req, res, next) => {
       `Game ${id} updated: selected answer = ${selectedAnswerId}, next questionNum = ${selectedAnswer.nextQuestN}`
     );
   } catch (error) {
-    next(error);
+    console.error(`Game ${id} szavazás-lezárási hiba:`, error);
+    try {
+      await gameService.update(id, { availableForAns: false });
+    } catch (resetError) {
+      console.error(
+        `Game ${id} availableForAns visszaállítása sikertelen:`,
+        resetError
+      );
+    }
   }
 };
 

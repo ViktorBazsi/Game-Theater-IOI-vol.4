@@ -31,6 +31,10 @@ const list = async (req, res, next) => {
 const getById = async (req, res, next) => {
   const { id } = req.params;
   try {
+    // admin bárkit, más csak a saját profilját kérheti le
+    if (!req.user?.isAdmin && req.user?.id !== id) {
+      throw new HttpError("Csak a saját profilodat kérheted le", 403);
+    }
     const userById = await userService.getById(id);
     res.status(200).json(userById);
   } catch (error) {
@@ -42,13 +46,13 @@ const update = async (req, res, next) => {
   const { id } = req.params;
   const { username, email, password, isAdmin } = req.body;
 
-  // UserId form token - AUTHENTICATION NEEDED
-  let userId = extractUserIdFromToken(req, JWT_SECRET);
-  if (id != userId) {
-    return next(new HttpError("Csak a saját profilodat módosíthatod", 401));
-  }
-
   try {
+    // UserId form token - AUTHENTICATION NEEDED
+    let userId = extractUserIdFromToken(req, JWT_SECRET);
+    if (id != userId) {
+      return next(new HttpError("Csak a saját profilodat módosíthatod", 401));
+    }
+
     const updatedUser = await userService.update(id, {
       username,
       email,
@@ -64,13 +68,13 @@ const update = async (req, res, next) => {
 const destroy = async (req, res, next) => {
   const { id } = req.params;
 
-  // UserId form token - AUTHENTICATION NEEDED
-  let userId = extractUserIdFromToken(req, JWT_SECRET);
-  if (id != userId) {
-    return next(new HttpError("Csak a saját profilodat törölheted", 401));
-  }
-
   try {
+    // UserId form token - AUTHENTICATION NEEDED
+    let userId = extractUserIdFromToken(req, JWT_SECRET);
+    if (id != userId) {
+      return next(new HttpError("Csak a saját profilodat törölheted", 401));
+    }
+
     const deletedUser = await userService.destroy(id);
     res.status(200).json({ deletedUser });
   } catch (error) {
@@ -82,13 +86,13 @@ const destroy = async (req, res, next) => {
 const resetAnswers = async (req, res, next) => {
   const { id } = req.params;
 
-  // UserId from token - AUTHENTICATION NEEDED
-  let userId = extractUserIdFromToken(req, JWT_SECRET);
-  if (id != userId) {
-    return next(new HttpError("Csak a saját profilodat módosíthatod", 401));
-  }
-
   try {
+    // UserId from token - AUTHENTICATION NEEDED
+    let userId = extractUserIdFromToken(req, JWT_SECRET);
+    if (id != userId) {
+      return next(new HttpError("Csak a saját profilodat módosíthatod", 401));
+    }
+
     const updatedUser = await userService.resetAnswers(id);
     res.status(200).json(updatedUser);
   } catch (error) {
@@ -240,30 +244,47 @@ const LeaveGameById = async (req, res, next) => {
 
 const addAnswerToGame = async (req, res, next) => {
   const { gameId } = req.params;
-  const { id: answerId } = req.body;
+  const answerId = req.body?.id;
   const userId = req.user?.id;
 
   try {
     if (!userId) {
-      return res
-        .status(401)
-        .json({ error: "Unauthorized: User not authenticated" });
+      throw new HttpError("Unauthorized: User not authenticated", 401);
+    }
+    if (!answerId || typeof answerId !== "string") {
+      throw new HttpError("Az answer id megadása kötelező", 400);
     }
 
     const game = await gameService.getById(gameId);
-    if (!game) {
-      return res.status(404).json({ error: "Game not found" });
+
+    // Csak nyitott szavazás alatt lehet válaszolni
+    if (!game.availableForAns) {
+      throw new HttpError("Most nem lehet válaszolni", 409);
     }
 
+    // A user tagsága a DB-ből (nem a tokenből) ellenőrizve
+    const dbUser = await userService.getById(userId);
+    if (!dbUser || dbUser.gameId !== gameId) {
+      throw new HttpError("Nem vagy tagja ennek a játéknak", 403);
+    }
+
+    // Az answer a szerver oldali DB-ből, a kliens objektumát nem használjuk
     const existingAnswer = await answerService.getById(answerId);
-    if (!existingAnswer) {
-      return res.status(404).json({ error: "Answer not found" });
+
+    if (existingAnswer.relQuestN !== game.questionNum) {
+      throw new HttpError("A válasz nem az aktuális kérdéshez tartozik", 400);
     }
 
-    // 🔥 A felhasználóhoz hozzákapcsoljuk az új választ
-    const updatedUser = await userService.update(userId, {
-      answers: [answerId],
-    });
+    // Egy kérdésre egy szavazat: az ehhez a kérdéshez tartozó régi válasz cserélődik
+    const oldAnswerIds = dbUser.answers
+      .filter((a) => a.relQuestN === game.questionNum && a.id !== answerId)
+      .map((a) => a.id);
+
+    const updatedUser = await userService.replaceAnswer(
+      userId,
+      answerId,
+      oldAnswerIds
+    );
 
     res.status(200).json(updatedUser);
   } catch (error) {

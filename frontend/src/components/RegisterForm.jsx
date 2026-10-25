@@ -1,5 +1,5 @@
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { userValidationSchemaForRegister } from "../schema/userValidationSchema";
+import { userValidationSchemaForRegister } from "../schema/UserValidationSchema";
 import { useContext } from "react";
 import AuthContext from "../contexts/AuthContext";
 import { toast } from "react-toastify";

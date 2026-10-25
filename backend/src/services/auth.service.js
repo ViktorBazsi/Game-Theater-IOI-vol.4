@@ -24,6 +24,11 @@ const register = async ({ username, email, password }) => {
 };
 
 const login = async ({ username, email, password }) => {
+  if (!username && !email) {
+    throw new HttpError("Felhasználónév vagy e-mail megadása kötelező!", 400);
+  }
+  if (!password) throw new HttpError("Jelszó megadása kötelező!", 400);
+
   const user = await prisma.user.findFirst({
     where: {
       OR: [{ username: username || undefined }, { email: email || undefined }],

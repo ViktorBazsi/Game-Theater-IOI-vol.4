@@ -12,21 +12,20 @@ const create = async ({ name }) => {
 const list = async () => {
   const allGames = await prisma.game.findMany({
     include: {
-      users: true,
+      users: { select: { id: true, username: true } },
     },
   });
   return allGames;
 };
 
-const getById = async (id) => {
+// withAnswers: csak admin / szerveroldali számoláshoz (a játékosok válaszaival)
+const getById = async (id, { withAnswers = false } = {}) => {
   await isValidGameId(id);
   const gameById = await prisma.game.findUnique({
     where: { id },
     include: {
       users: {
-        include: {
-          answers: true,
-        },
+        select: { id: true, username: true, answers: withAnswers },
       },
       collAnswer: true,
     },
@@ -44,6 +43,15 @@ const update = async (id, gameData) => {
   });
 
   return updatedGame;
+};
+
+// Atomikus nyitás: csak akkor sikerül, ha a szavazás még nincs nyitva
+const openVoting = async (id) => {
+  const { count } = await prisma.game.updateMany({
+    where: { id, availableForAns: false },
+    data: { availableForAns: true },
+  });
+  return count === 1;
 };
 
 const destroy = async (id) => {
@@ -80,4 +88,5 @@ export default {
   destroy,
   // EXTRA
   resetGame,
+  openVoting,
 };

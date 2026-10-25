@@ -5,10 +5,21 @@ import authMiddleware from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 // POST
-router.post("/", userController.create);
+router.post(
+  "/",
+  authMiddleware.authenticate,
+  authMiddleware.authorize,
+  userController.create
+);
 // GET
-router.get("/", userController.list);
-router.get("/:id", userController.getById);
+router.get(
+  "/",
+  authMiddleware.authenticate,
+  authMiddleware.authorize,
+  userController.list
+);
+// admin vagy a saját profil (a controllerben ellenőrizve)
+router.get("/:id", authMiddleware.authenticate, userController.getById);
 // PUT
 router.put("/:id", authMiddleware.authenticate, userController.update);
 // DELETE

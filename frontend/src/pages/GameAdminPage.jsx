@@ -78,7 +78,7 @@ export default function GameAdminPage() {
 
         {/* Upcoming Question (2/5 szélesség nagy kijelzőn) */}
         <div className="lg:w-2/5 flex flex-col items-center">
-          {game?.questionNum && (
+          {game?.questionNum != null && (
             <UpcomingQuestion questionNumber={game.questionNum} />
           )}
 

@@ -1,6 +1,21 @@
 import questionService from "../services/question.service.js";
 import HttpError from "../utils/HttpError.js";
 
+// Nem-admin usernek a válaszok pontértékei és a következő kérdés nem látszanak
+const hideAnswerSecrets = (question, user) => {
+  if (!question || user?.isAdmin || !Array.isArray(question.answers)) {
+    return question;
+  }
+  return {
+    ...question,
+    answers: question.answers.map(({ id, answer, relQuestN }) => ({
+      id,
+      answer,
+      relQuestN,
+    })),
+  };
+};
+
 const create = async (req, res, next) => {
   const { number, question } = req.body;
   const userId = req.user?.id;
@@ -25,7 +40,9 @@ const create = async (req, res, next) => {
 const list = async (req, res, next) => {
   try {
     const questions = await questionService.list();
-    res.status(200).json(questions);
+    res
+      .status(200)
+      .json(questions.map((q) => hideAnswerSecrets(q, req.user)));
   } catch (error) {
     next(error);
   }
@@ -35,7 +52,7 @@ const getById = async (req, res, next) => {
   const { id } = req.params;
   try {
     const getQuestionById = await questionService.getById(id);
-    res.status(200).json(getQuestionById);
+    res.status(200).json(hideAnswerSecrets(getQuestionById, req.user));
   } catch (error) {
     next(error);
   }
@@ -47,7 +64,7 @@ const getByNumber = async (req, res, next) => {
     const getQuestionByNumber = await questionService.getByNumber(
       Number(number),
     );
-    res.status(200).json(getQuestionByNumber);
+    res.status(200).json(hideAnswerSecrets(getQuestionByNumber, req.user));
   } catch (error) {
     next(error);
   }

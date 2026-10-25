@@ -7,7 +7,7 @@ export default function UpcomingQuestion({ questionNumber }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!questionNumber) return;
+    if (questionNumber == null) return;
 
     const fetchQuestion = async () => {
       try {

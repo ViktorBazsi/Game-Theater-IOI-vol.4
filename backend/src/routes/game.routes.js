@@ -18,16 +18,32 @@ router.post(
 router.get("/", authMiddleware.authenticate, gameController.list);
 router.get("/:id", authMiddleware.authenticate, gameController.getById);
 // PUT
-router.put("/:id", authMiddleware.authenticate, gameController.update);
+router.put(
+  "/:id",
+  authMiddleware.authenticate,
+  authMiddleware.authorize,
+  gameController.update
+);
 // DELETE
-router.delete("/:id", authMiddleware.authenticate, gameController.destroy);
+router.delete(
+  "/:id",
+  authMiddleware.authenticate,
+  authMiddleware.authorize,
+  gameController.destroy
+);
 // NEXT
 router.get(
   "/next/:id",
   authMiddleware.authenticate,
+  authMiddleware.authorize,
   gameController.nextQuestion
 );
 // RESET
-router.put("/reset/:id", authMiddleware.authenticate, gameController.reset);
+router.put(
+  "/reset/:id",
+  authMiddleware.authenticate,
+  authMiddleware.authorize,
+  gameController.reset
+);
 
 export default router;

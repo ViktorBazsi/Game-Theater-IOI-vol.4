@@ -25,12 +25,14 @@ const create = async ({ username, email, password }) => {
       email,
       password: hashedPassword,
     },
+    omit: { password: true },
   });
   return newUser;
 };
 
 const list = async () => {
   const allUsers = await prisma.user.findMany({
+    omit: { password: true },
     include: {
       answers: true,
     },
@@ -41,6 +43,7 @@ const list = async () => {
 const getById = async (id) => {
   const userById = await prisma.user.findUnique({
     where: { id },
+    omit: { password: true },
     include: {
       answers: true,
     },
@@ -69,6 +72,7 @@ const update = async (id, userData) => {
         },
       }),
     },
+    omit: { password: true },
     include: {
       answers: true, // 📌 Visszaküldjük a felhasználóhoz tartozó válaszokat
     },
@@ -87,6 +91,7 @@ const resetAnswers = async (id) => {
         set: [], // 📌 Minden választ eltávolítunk (disconnect)
       },
     },
+    omit: { password: true },
     include: {
       answers: true, // 📌 Visszaküldjük a felhasználóhoz tartozó válaszokat (most üres lesz)
     },
@@ -95,10 +100,26 @@ const resetAnswers = async (id) => {
   return updatedUser;
 };
 
+// Egy kérdésre egy szavazat: a régi válaszokat lecseréli az újra (egy lépésben)
+const replaceAnswer = async (id, answerId, oldAnswerIds) => {
+  return prisma.user.update({
+    where: { id },
+    data: {
+      answers: {
+        disconnect: oldAnswerIds.map((oldId) => ({ id: oldId })),
+        connect: { id: answerId },
+      },
+    },
+    omit: { password: true },
+    include: { answers: true },
+  });
+};
+
 const destroy = async (id) => {
   await isValidUserId(id);
   const deletedUser = await prisma.user.delete({
     where: { id },
+    omit: { password: true },
   });
   return deletedUser;
 };
@@ -111,4 +132,5 @@ export default {
   destroy,
   // EXTRA
   resetAnswers,
+  replaceAnswer,
 };
